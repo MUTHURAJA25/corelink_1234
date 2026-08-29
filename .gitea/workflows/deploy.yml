@@ -106,7 +106,7 @@ jobs:
             -Dsonar.projectName=Corelink \
             -Dsonar.sources=. \
             -Dsonar.exclusions=node_modules/**,dist/**,server/node_modules/** \
-            -Dsonar.host.url=http://localhost:9000 \
+            -Dsonar.host.url=http://sonarqube:9000
             -Dsonar.token="$SONAR_TOKEN"
 
           echo "=========================================="
