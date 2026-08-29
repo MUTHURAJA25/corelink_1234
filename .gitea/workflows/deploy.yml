@@ -1,4 +1,4 @@
-name: Corelink CI/CD Pipeline
+name: Corelink CI/CD Pipeline Test
 
 on:
   push:
