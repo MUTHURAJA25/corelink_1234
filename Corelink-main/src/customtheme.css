@@ -1,0 +1,339 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    color: theme("colors.body");
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+/* =========================================================
+   COMPONENTS
+   ========================================================= */
+
+@layer components {
+  /* =======================================================
+     TYPOGRAPHY
+     ======================================================= */
+
+  .heading-xxl {
+    @apply text-6xl font-bold leading-tight text-heading;
+   }
+
+  .heading-xl {
+    @apply text-5xl font-bold leading-tight text-heading;
+  }
+
+  .heading-lg {
+    @apply text-3xl font-bold leading-tight text-heading;
+  }
+
+  .heading-md {
+    @apply text-2xl font-semibold leading-tight text-heading;
+  }
+
+  .body-lg {
+    @apply text-lg leading-7 text-body;
+  }
+
+  .body-md {
+    @apply text-base leading-6 text-body;
+  }
+
+  .body-sm {
+    @apply text-sm leading-5 text-muted;
+  }
+
+  /* =======================================================
+     RESPONSIVE TYPOGRAPHY
+     ======================================================= */
+
+  .heading-xl {
+    @apply md:text-5xl lg:text-6xl;
+  }
+
+  .heading-lg {
+    @apply md:text-4xl;
+  }
+
+  /* =======================================================
+     LAYOUT
+     ======================================================= */
+
+  .section {
+    @apply w-full px-5 py-16;
+  }
+
+  .container-main {
+    @apply mx-auto w-full max-w-7xl;
+  }
+
+  /* =======================================================
+     BUTTONS
+     ======================================================= */
+
+  .btn-primary {
+    @apply border-[3px] border-solid border-transparent rounded-[31px]
+    [background:linear-gradient(45deg,#5B3CCA,#8961CE,#25223D)_padding-box,linear-gradient(360deg,#270F7F,#E8DAFF)_border-box]
+    px-6 py-6 text-sm font-semibold text-white
+    shadow-[0_10px_28px_rgba(99,115,249,0.35)];
+  }
+
+  .btn-secondary {
+    @apply rounded-button bg-[linear-gradient(104.09deg,#06132A_10.79%,#18415F_88.28%)] border border-border px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-black/10;
+  }
+
+  .btn-transparent {
+    @apply rounded-button bg-transparent px-6 py-3 text-sm font-semibold text-white transition duration-300 border border-white hover:bg-black/10;
+  }
+
+  /* =======================================================
+     CARD
+     ======================================================= */
+
+  .glass-card {
+    @apply rounded-card border border-border bg-white/5 p-6 backdrop-blur-xl;
+  }
+
+  /* =======================================================
+     SECTION TITLE
+     ======================================================= */
+
+  .section-title {
+    @apply mx-auto max-w-3xl text-center;
+  }
+
+  /* =======================================================
+     HEADER — NAV
+     ======================================================= */
+
+  .nav-pill {
+    @apply flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-medium transition-colors duration-300;
+  }
+
+  .title-gradient {
+    @apply bg-[linear-gradient(45deg,#00D68F,#52BC67,#1E7ACF,#11BCCB,#7DBBD7,#1CB522,#919F77)] bg-clip-text text-transparent;
+  }
+
+  .button-animation{
+    @apply flex
+      w-[17px]
+      shrink-0
+      items-center
+      justify-center
+      opacity-100
+      transition-all
+      duration-300
+      ease-in-out
+      group-hover:translate-x-2
+      group-hover:opacity-0
+  }
+
+  .title-gradient-two {
+    @apply bg-[linear-gradient(90deg,#1E7ACF,#11BCCB,#26A69A,#A2E000)] bg-clip-text text-transparent inline-block;
+  }
+.title-gradient-three {
+  @apply bg-[linear-gradient(100deg,_rgb(157,244,0)_6.17%,_rgb(23,120,203)_37.73%,_rgb(62,159,138)_64.02%,_rgb(74,85,228)_93.83%)] bg-clip-text text-transparent
+}
+  .tab-gradient {
+    @apply bg-[linear-gradient(94.66deg,#6A44F2_-6.72%,#5B3CCA_20.47%,#8961CE_50.61%,#342964_89.62%,#25223D_116.21%)] text-white px-6 py-3 rounded-lg;
+  }
+  .border-gradient {
+    @apply border-[1px] border-solid border-transparent rounded-[31px];
+  }
+  .nav-pill-active {
+    @apply text-[#6A44F2];
+  }
+
+  .nav-pill-inactive {
+    @apply text-[#1E1C2D] hover:text-[#6A44F2];
+  }
+
+  .mobile-nav-link {
+    @apply rounded-xl px-3 py-3 text-sm font-medium text-white transition-colors duration-300 hover:bg-white/10;
+  }
+
+  /* =======================================================
+     HEADER — GLASS CROSSFADE
+     ======================================================= */
+
+  .glass-layer-base {
+    @apply pointer-events-none absolute inset-0 -z-10 rounded-[inherit] backdrop-blur-xl transition-opacity duration-500;
+  }
+
+  .glass-layer-light {
+    @apply glass-layer-base bg-gradient-to-r from-white/15 via-white/10 to-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.25)];
+  }
+
+  .glass-layer-dark {
+    @apply glass-layer-base bg-gradient-to-r from-black/80 via-black/70 to-black/60 shadow-[0_4px_24px_rgba(0,0,0,0.45)];
+  }
+
+  /* =======================================================
+     HEADER — PRODUCT DROPDOWN
+     ======================================================= */
+
+  .dropdown-panel {
+    @apply overflow-hidden rounded-2xl border border-white/10 bg-white/95 py-2 shadow-2xl shadow-black/50;
+  }
+
+  .dropdown-item {
+    @apply relative flex items-center gap-3 overflow-hidden px-8 py-4 text-sm font-medium text-gray-400 transition-all duration-300 hover:bg-[#ECF5FF] hover:text-black;
+  }
+
+  .dropdown-item-active {
+    @apply bg-white text-primary;
+  }
+
+  .dropdown-item-indicator {
+    @apply absolute left-0 top-0 h-full w-0.5 origin-center scale-y-0 bg-primary transition-transform duration-300 group-hover:scale-y-100;
+  }
+
+  .dropdown-item-dot {
+    @apply h-2 w-2 rounded-full bg-primary transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_0_10px_theme(colors.primary)];
+  }
+
+  /* =======================================================
+     HEADER — LOGIN BUTTON
+     ======================================================= */
+
+  .btn-login {
+    @apply flex h-[42.6px] items-center justify-center rounded-full bg-[linear-gradient(104.09deg,#06132A_10.79%,#18415F_88.28%)] text-sm font-semibold text-white shadow-[inset_-5px_-5px_10px_0_#00000040,inset_5px_5px_5px_0_#18415F,-4px_-4px_10px_0_#18415F66,1px_4px_6px_0_#18415F4F] backdrop-blur-[6px] transition-all duration-300;
+  }
+
+  .btn-login-scrolled {
+    @apply border border-white;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE LAYOUT
+   ========================================================= */
+
+
+   /* Apply only from 440px to 600px */
+
+.carousel-title{
+  color:#BABABA;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.hero-title{
+ margin-top: 100px;
+  font-size: 32px;
+  line-height: 1.1;
+  color: #000;
+      font-weight: 700;
+
+}
+@media (min-width: 300px) and (max-width:768px){
+
+.custom-postion{
+position:relative;
+bottom: 0px !important;
+}
+}
+
+   @media (min-width: 300px) and (max-width: 440px) {
+  .carousel-position {
+        left: 262px;
+  }
+}
+
+  @media (min-width: 320px) and (max-width: 375px) {
+      .carousel-title{
+        font-size: 22px;
+        font-weight: 600;
+        margin-right: 100px;
+    }
+}
+
+@media (min-width: 440px) and (max-width: 499px) {
+  .carousel-position {
+    left: 290px;
+  }
+}
+
+@media (min-width: 500px) and (max-width: 599px) {
+  .carousel-position {
+    left: 342px;
+  }
+}
+
+
+
+@media (min-width: 600px) and (max-width:699px) {
+  .carousel-position {
+    left: 419px;
+  }
+}
+
+/* sm: 640px */
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 38px;
+  }
+}
+
+@media (min-width: 768px) and (max-width:1024px) {
+  .carousel-position {
+        left: 233px;
+  }
+    .hero-title {
+    margin-top: 0;
+    font-size: 48px;
+  }
+}
+
+@media (min-width: 1024px){
+  .carousel-position {
+        left: 259px;
+  }
+
+  .hero-title {
+    font-size: 58px;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 768px) {
+  .section {
+    @apply px-10 py-20;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section {
+    @apply px-16;
+  }
+}
+
+@media (min-width: 1280px) {
+  .hero-title {
+    font-size: 64px;
+  }
+}

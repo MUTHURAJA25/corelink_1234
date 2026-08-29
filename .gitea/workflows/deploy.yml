@@ -1,0 +1,369 @@
+name: Corelink CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  # ==========================================================
+  # STAGE 1 - CHECKOUT
+  # ==========================================================
+  checkout:
+    name: "Stage 1 - Checkout"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+
+  # ==========================================================
+  # STAGE 2 - INSTALL
+  # ==========================================================
+  install:
+    name: "Stage 2 - Install Dependencies"
+    runs-on: ubuntu-latest
+    needs: checkout
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Frontend Dependencies
+        run: |
+          npm ci
+
+      - name: Install Backend Dependencies
+        run: |
+          npm --prefix server ci
+
+
+  # ==========================================================
+  # STAGE 3 - BUILD
+  # ==========================================================
+  build:
+    name: "Stage 3 - Build"
+    runs-on: ubuntu-latest
+    needs: install
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          npm --prefix server ci
+
+      - name: Build React Application
+        run: |
+          npm run build
+
+      - name: Verify Build
+        run: |
+          test -d dist
+          echo "Frontend build successful"
+
+
+  # ==========================================================
+  # STAGE 4 - SONARQUBE
+  # ==========================================================
+  sonarqube:
+    name: "Stage 4 - SonarQube"
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+        run: |
+
+          echo "=========================================="
+          echo "Starting SonarQube Analysis"
+          echo "=========================================="
+
+          npm install -g sonar-scanner
+
+          sonar-scanner \
+            -Dsonar.projectKey=corelink \
+            -Dsonar.projectName=Corelink \
+            -Dsonar.sources=. \
+            -Dsonar.exclusions=node_modules/**,dist/**,server/node_modules/** \
+            -Dsonar.host.url=http://localhost:9000 \
+            -Dsonar.token="$SONAR_TOKEN"
+
+          echo "=========================================="
+          echo "SonarQube Analysis Completed"
+          echo "=========================================="
+
+
+  # ==========================================================
+  # STAGE 5 - DEPLOY TO LOCAL EC2
+  # ==========================================================
+  deploy:
+    name: "Stage 5 - Deploy to Localhost"
+    runs-on: ubuntu-latest
+    needs: sonarqube
+
+    steps:
+
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+
+      - name: Install Frontend Dependencies
+        run: |
+          npm ci
+
+
+      - name: Build Frontend
+        run: |
+          npm run build
+
+
+      - name: Deploy Application
+        run: |
+
+          set -e
+
+          echo "=========================================="
+          echo "Starting Local Deployment"
+          echo "=========================================="
+
+          APP_DIR="/home/ubuntu/corelink"
+          WEB_DIR="/var/www/corelink"
+
+
+          # ------------------------------------------------
+          # Create application directory
+          # ------------------------------------------------
+
+          sudo mkdir -p "$APP_DIR"
+          sudo mkdir -p "$WEB_DIR"
+
+
+          # ------------------------------------------------
+          # Copy application files
+          # ------------------------------------------------
+
+          echo "Copying application files..."
+
+          sudo rsync -a \
+            --exclude=node_modules \
+            --exclude=dist \
+            --exclude=.git \
+            --exclude=.env \
+            --exclude=server/.env \
+            ./ "$APP_DIR/"
+
+
+          # ------------------------------------------------
+          # Install backend dependencies
+          # ------------------------------------------------
+
+          echo "Installing backend dependencies..."
+
+          cd "$APP_DIR"
+
+          sudo npm ci --omit=dev
+
+          sudo npm --prefix server ci --omit=dev
+
+
+          # ------------------------------------------------
+          # Make sure server .env exists
+          # ------------------------------------------------
+
+          if [ ! -f "$APP_DIR/server/.env" ]; then
+
+            echo "ERROR: $APP_DIR/server/.env does not exist"
+
+            echo "Create the production environment file before deployment."
+
+            exit 1
+
+          fi
+
+
+          # ------------------------------------------------
+          # Install PM2 if required
+          # ------------------------------------------------
+
+          if ! command -v pm2 >/dev/null 2>&1; then
+
+            echo "PM2 not found. Installing PM2..."
+
+            sudo npm install -g pm2
+
+          fi
+
+
+          # ------------------------------------------------
+          # Stop old application
+          # ------------------------------------------------
+
+          echo "Stopping existing Corelink API..."
+
+          pm2 delete corelink-api || true
+
+
+          # ------------------------------------------------
+          # Start backend
+          # ------------------------------------------------
+
+          echo "Starting Corelink API..."
+
+          pm2 start "$APP_DIR/server/index.js" \
+            --name corelink-api
+
+
+          # ------------------------------------------------
+          # Save PM2 process
+          # ------------------------------------------------
+
+          pm2 save
+
+
+          # ------------------------------------------------
+          # Deploy frontend
+          # ------------------------------------------------
+
+          echo "Deploying React frontend..."
+
+          sudo rm -rf "$WEB_DIR"/*
+
+          sudo cp -r "$GITHUB_WORKSPACE/dist/"* "$WEB_DIR/"
+
+
+          # ------------------------------------------------
+          # Nginx configuration
+          # ------------------------------------------------
+
+          echo "Testing Nginx configuration..."
+
+          sudo nginx -t
+
+
+          # ------------------------------------------------
+          # Reload Nginx
+          # ------------------------------------------------
+
+          echo "Reloading Nginx..."
+
+          sudo systemctl reload nginx
+
+
+          echo "=========================================="
+          echo "Deployment Completed Successfully"
+          echo "=========================================="
+
+
+  # ==========================================================
+  # STAGE 6 - HEALTH CHECK
+  # ==========================================================
+  health-check:
+    name: "Stage 6 - Health Check"
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+
+      # ------------------------------------------------
+      # Check PM2
+      # ------------------------------------------------
+
+      - name: Check PM2
+        run: |
+
+          echo "Checking Corelink PM2 process..."
+
+          pm2 status corelink-api
+
+
+      # ------------------------------------------------
+      # Check Backend API
+      # ------------------------------------------------
+
+      - name: Check Backend API
+        run: |
+
+          echo "Checking backend API..."
+
+          curl -f http://localhost:8086/api/health
+
+          echo ""
+          echo "Backend health check passed."
+
+
+      # ------------------------------------------------
+      # Check Nginx
+      # ------------------------------------------------
+
+      - name: Check Nginx
+        run: |
+
+          echo "Checking Nginx..."
+
+          systemctl is-active --quiet nginx
+
+          echo "Nginx health check passed."
+
+
+      # ------------------------------------------------
+      # Check Frontend
+      # ------------------------------------------------
+
+      - name: Check Frontend
+        run: |
+
+          echo "Checking frontend..."
+
+          curl -f http://localhost/
+
+          echo ""
+          echo "Frontend health check passed."
+
+
+      # ------------------------------------------------
+      # Final Result
+      # ------------------------------------------------
+
+      - name: Deployment Health Check Successful
+        run: |
+
+          echo ""
+          echo "=========================================="
+          echo "        HEALTH CHECK PASSED"
+          echo "=========================================="
+          echo ""
+          echo "Corelink Application is UP"
+          echo ""
+          echo "Frontend : http://localhost/"
+          echo "Backend  : http://localhost:8086"
+          echo "Health   : http://localhost:8086/api/health"
+          echo "SonarQube: http://localhost:9000"
+          echo ""
+          echo "=========================================="
