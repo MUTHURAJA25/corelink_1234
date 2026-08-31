@@ -1,4 +1,4 @@
-name: Token Test
+name: Gitea Checkout Test
 
 on:
   push:
@@ -10,15 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check Gitea Token
-        run: |
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "Server: $GITHUB_SERVER_URL"
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: mxk_1025/corelink_1234
+          token: ${{ secrets.CHECKOUT_TOKEN }}
 
-          if [ -n "$GITHUB_TOKEN" ]; then
-            echo "GITHUB_TOKEN is available"
-            echo "Token length: ${#GITHUB_TOKEN}"
-          else
-            echo "GITHUB_TOKEN is NOT available"
-            exit 1
-          fi
+      - name: Verify Checkout
+        run: |
+          echo "Checkout successful"
+          ls -la
+          git status
