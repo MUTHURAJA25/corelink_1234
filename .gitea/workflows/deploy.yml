@@ -15,9 +15,10 @@ jobs:
         with:
           repository: mxk_1025/corelink_1234
           token: ${{ secrets.CHECKOUT_TOKEN }}
+          fetch-depth: 1
 
-      - name: Verify Checkout
+      - name: Verify
         run: |
-          echo "Checkout successful"
-          ls -la
+          echo "CHECKOUT SUCCESS"
           git status
+          git log -1 --oneline
