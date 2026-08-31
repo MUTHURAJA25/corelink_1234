@@ -12,16 +12,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          repository: mxk_1025/corelink_1234
-          token: ${{ secrets.CHECKOUT_TOKEN }}
-          fetch-depth: 1
+  env:
+    GITEA_TOKEN: ${{ secrets.CHECKOUT_TOKEN }}
+  run: |
+    set -e
 
-      - name: Verify Checkout
-        run: |
-          echo "CHECKOUT SUCCESS"
-          echo "Repository: $GITHUB_REPOSITORY"
-          git status
-          git log -1 --oneline
-          ls -la
+    echo "Cloning Corelink repository..."
+
+    git clone \
+      --depth 1 \
+      --branch main \
+      "http://mxk_1025:${GITEA_TOKEN}@gitea:3000/mxk_1025/corelink_1234.git" \
+      .
+
+    echo "CHECKOUT SUCCESS"
