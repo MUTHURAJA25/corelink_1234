@@ -7,6 +7,7 @@ on:
 
 jobs:
   test:
+    name: Test Gitea Checkout
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +21,7 @@ jobs:
       - name: Verify Checkout
         run: |
           echo "CHECKOUT SUCCESS"
+          echo "Repository: $GITHUB_REPOSITORY"
           git status
           git log -1 --oneline
           ls -la
