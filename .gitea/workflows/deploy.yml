@@ -1,4 +1,4 @@
-name: Corelink Test
+name: Test Gitea Actions
 
 on:
   push:
@@ -11,14 +11,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check Gitea Environment
+        run: |
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Server: $GITHUB_SERVER_URL"
+          echo "Workspace: $GITHUB_WORKSPACE"
+
+          if [ -n "$GITHUB_TOKEN" ]; then
+            echo "GITHUB_TOKEN is available"
+          else
+            echo "GITHUB_TOKEN is NOT available"
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Test
         run: |
-          echo "================================"
-          echo "Gitea Actions is working"
-          echo "================================"
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "Branch: $GITHUB_REF_NAME"
-          echo "Runner: $RUNNER_NAME"
+          echo "Gitea Actions checkout successful"
+          ls -la
