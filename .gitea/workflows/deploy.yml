@@ -17,8 +17,9 @@ jobs:
           token: ${{ secrets.CHECKOUT_TOKEN }}
           fetch-depth: 1
 
-      - name: Verify
+      - name: Verify Checkout
         run: |
           echo "CHECKOUT SUCCESS"
           git status
           git log -1 --oneline
+          ls -la
