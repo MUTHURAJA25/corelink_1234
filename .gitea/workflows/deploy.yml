@@ -1,4 +1,4 @@
-name: Gitea Network Test
+name: Gitea Checkout Test
 
 on:
   push:
@@ -7,15 +7,21 @@ on:
 
 jobs:
   test:
+    name: Test Gitea Checkout
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test Gitea DNS
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: mxk_1025/corelink_1234
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          fetch-depth: 1
+
+      - name: Verify Checkout
         run: |
-          echo "=== DNS TEST ==="
-          getent hosts gitea
-
-          echo "=== GITEA TEST ==="
-          wget -S -O /dev/null http://gitea:3000/ 2>&1
-
-          echo "=== NETWORK TEST COMPLETE ==="
+          echo "CHECKOUT SUCCESS"
+          echo "Repository: $GITHUB_REPOSITORY"
+          git status
+          git log -1 --oneline
+          ls -la
