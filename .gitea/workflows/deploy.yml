@@ -1,4 +1,4 @@
-name: Test Gitea Actions
+name: Gitea Checkout Test
 
 on:
   push:
@@ -7,27 +7,19 @@ on:
 
 jobs:
   test:
-    name: Test Gitea Actions
+    name: Checkout Test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check Gitea Environment
+      - name: Check Token
+        env:
+          ACTIONS_TOKEN: ${{ secrets.GITEA_TOKEN }}
         run: |
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "Server: $GITHUB_SERVER_URL"
-          echo "Workspace: $GITHUB_WORKSPACE"
-
-          if [ -n "$GITHUB_TOKEN" ]; then
-            echo "GITHUB_TOKEN is available"
+          if [ -n "$ACTIONS_TOKEN" ]; then
+            echo "GITEA_TOKEN is available"
           else
-            echo "GITHUB_TOKEN is NOT available"
-            exit 1
+            echo "GITEA_TOKEN is NOT available"
           fi
 
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Test
-        run: |
-          echo "Gitea Actions checkout successful"
-          ls -la
