@@ -1,4 +1,4 @@
-name: Gitea Checkout Test
+name: Token Test
 
 on:
   push:
@@ -7,19 +7,18 @@ on:
 
 jobs:
   test:
-    name: Checkout Test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check Token
-        env:
-          ACTIONS_TOKEN: ${{ secrets.GITEA_TOKEN }}
+      - name: Check Gitea Token
         run: |
-          if [ -n "$ACTIONS_TOKEN" ]; then
-            echo "GITEA_TOKEN is available"
-          else
-            echo "GITEA_TOKEN is NOT available"
-          fi
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Server: $GITHUB_SERVER_URL"
 
-      - name: Checkout
-        uses: actions/checkout@v4
+          if [ -n "$GITHUB_TOKEN" ]; then
+            echo "GITHUB_TOKEN is available"
+            echo "Token length: ${#GITHUB_TOKEN}"
+          else
+            echo "GITHUB_TOKEN is NOT available"
+            exit 1
+          fi
