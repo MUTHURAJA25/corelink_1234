@@ -11,6 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check Environment
+        run: |
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Server: $GITHUB_SERVER_URL"
+          echo "Workspace: $GITHUB_WORKSPACE"
+          getent hosts gitea || true
+          echo "Testing Gitea connection..."
+          wget -S -O /dev/null http://gitea:3000/ 2>&1 || true
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -21,7 +30,6 @@ jobs:
       - name: Verify Checkout
         run: |
           echo "CHECKOUT SUCCESS"
-          echo "Repository: $GITHUB_REPOSITORY"
           git status
           git log -1 --oneline
           ls -la
